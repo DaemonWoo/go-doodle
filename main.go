@@ -10,27 +10,44 @@ import (
 
 var wg sync.WaitGroup
 
-func checkURL(url string) {
-	defer wg.Done()
-	res, err := http.Get(url)
-		if err != nil {
-			fmt.Printf("Error occured while fetching %s\n", url)
-			return
-		}
-		res.Body.Close()
-		
-		fmt.Printf("%s -> %d\n", url, res.StatusCode)
-}
-
 func main() {
     urls := os.Args[1:]
+	workerCount := 5
+	
+	jobs := make(chan Job)
+	results := make(chan Result)
+
+	client := &http.Client{}
+
+	// start workers
+    for range workerCount {
+		wg.Go(func() {
+			worker(jobs, results, client)
+		})
+	}
+
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	go func() {
+		for _, url := range urls {
+			jobs <- Job{URL: url}
+		}
+		close(jobs)
+	}()
+
 	start := time.Now()
 
-    for _, url := range urls {
-		wg.Add(1)
-        go checkURL(url)
-    }
-
-	wg.Wait()
-	fmt.Printf("%d ms", time.Since(start).Milliseconds())
+	// read results safely
+	for res := range results {
+		if res.Err != nil {
+			fmt.Printf("[ERR] - %s\n", res.URL)
+		} else {
+			fmt.Printf("%s -> %d\n", res.URL, res.StatusCode)
+		}
+	}
+	
+	fmt.Printf("time: %d ms", time.Since(start).Milliseconds())
 }

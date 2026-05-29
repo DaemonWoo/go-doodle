@@ -13,7 +13,7 @@ import (
 var wg sync.WaitGroup
 
 func main() {
-    urls := os.Args[1:]
+	urls := os.Args[1:]
 	workerCount := 5
 
 	ctx, stop := signal.NotifyContext(
@@ -22,13 +22,14 @@ func main() {
 	)
 	defer stop()
 
-	jobs := make(chan Job)
-	results := make(chan Result)
+	// buffered channels
+	jobs := make(chan Job, 10)
+	results := make(chan Result, 10)
 
 	client := &http.Client{}
 
 	// start workers
-    for i := range workerCount {
+	for i := range workerCount {
 		wg.Go(func() {
 			worker(i, ctx, jobs, results, client)
 		})
@@ -41,7 +42,9 @@ func main() {
 
 	go func() {
 		for _, url := range urls {
+			fmt.Printf("sending job %s\n", url)
 			jobs <- Job{URL: url}
+			fmt.Printf("sent job %s\n", url)
 		}
 		close(jobs)
 	}()
@@ -56,6 +59,6 @@ func main() {
 			fmt.Printf("%s -> %d\n", res.URL, res.StatusCode)
 		}
 	}
-	
+
 	fmt.Printf("time: %d ms", time.Since(start).Milliseconds())
 }

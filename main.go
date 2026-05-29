@@ -28,9 +28,9 @@ func main() {
 	client := &http.Client{}
 
 	// start workers
-    for range workerCount {
+    for i := range workerCount {
 		wg.Go(func() {
-			worker(ctx, jobs, results, client)
+			worker(i, ctx, jobs, results, client)
 		})
 	}
 

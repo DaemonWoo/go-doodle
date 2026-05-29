@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
 	"sync"
 	"time"
 )
@@ -13,7 +15,13 @@ var wg sync.WaitGroup
 func main() {
     urls := os.Args[1:]
 	workerCount := 5
-	
+
+	ctx, stop := signal.NotifyContext(
+		context.Background(),
+		os.Interrupt,
+	)
+	defer stop()
+
 	jobs := make(chan Job)
 	results := make(chan Result)
 
@@ -22,7 +30,7 @@ func main() {
 	// start workers
     for range workerCount {
 		wg.Go(func() {
-			worker(jobs, results, client)
+			worker(ctx, jobs, results, client)
 		})
 	}
 

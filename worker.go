@@ -1,20 +1,48 @@
 package main
 
-import "net/http"
+import (
+	"context"
+	"net/http"
+)
 
-func worker(jobs <-chan Job, results chan<- Result, client *http.Client) {
-	for job := range jobs {
-		res, err := client.Get(job.URL)
-		if err != nil {
-			results <- Result{URL: job.URL, Err: err}
-			continue
-		}
+func worker(ctx context.Context, jobs <-chan Job, results chan<- Result, client *http.Client) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
 
-		defer res.Body.Close()
+		case job, ok := <-jobs:
+			if !ok {
+				return
+			}
+			req, err := http.NewRequestWithContext(
+				ctx,
+				http.MethodGet,
+				job.URL,
+				nil,
+			)
+			if err != nil {
+				results <- Result{
+					URL: job.URL,
+					Err: err,
+				}
+				continue
+			}
 
-		results <- Result{
-			URL:        job.URL,
-			StatusCode: res.StatusCode,
+			res, err := client.Do(req)
+			if err != nil {
+				results <- Result{
+					URL: job.URL,
+					Err: err,
+				}
+				continue
+			}
+			res.Body.Close()
+
+			results <- Result{
+				URL: job.URL,
+				StatusCode: res.StatusCode,
+			}
 		}
 	}
 }

@@ -24,12 +24,19 @@ func worker(
 				return
 			}
 
+			// Uncomment for rate-limiting logs
+			//fmt.Printf("%s waiting token\n", job.URL)
+			
 			// rate limit (ctx-aware)
 			select {
 			case <-ctx.Done():
 				return
 			case <-limiter:
 			}
+			// Uncomment for rate-limiting logs
+			// fmt.Printf("%s got token %s\n",
+			// 	job.URL,
+			// 	time.Now().Format("15:04:05.000"))
 
 			fmt.Printf(
 				"[worker-%d] processing %s\n",

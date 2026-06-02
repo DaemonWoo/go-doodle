@@ -11,13 +11,12 @@ import (
 )
 
 var wg sync.WaitGroup
-const Rpc = 2
 
 func main() {
 	urls := os.Args[1:]
 	workerCount := 5
-	
-	limiter := Limiter(Rpc)
+
+	limiter := Limiter()
 
 	ctx, stop := signal.NotifyContext(
 		context.Background(),

@@ -11,10 +11,13 @@ import (
 )
 
 var wg sync.WaitGroup
+const Rpc = 2
 
 func main() {
 	urls := os.Args[1:]
 	workerCount := 5
+	
+	limiter := Limiter(Rpc)
 
 	ctx, stop := signal.NotifyContext(
 		context.Background(),
@@ -31,7 +34,7 @@ func main() {
 	// start workers
 	for i := range workerCount {
 		wg.Go(func() {
-			worker(i, ctx, jobs, results, client)
+			worker(i, ctx, jobs, results, client, limiter)
 		})
 	}
 

@@ -12,6 +12,7 @@ func worker(
 	jobs <-chan Job,
 	results chan<- Result,
 	client *http.Client,
+	limiter <-chan struct{},
 ) {
 	for {
 		select {
@@ -21,6 +22,13 @@ func worker(
 		case job, ok := <-jobs:
 			if !ok {
 				return
+			}
+
+			// rate limit (ctx-aware)
+			select {
+			case <-ctx.Done():
+				return
+			case <-limiter:
 			}
 
 			fmt.Printf(
@@ -50,7 +58,7 @@ func worker(
 				id,
 				job.URL,
 			)
-			
+
 			if err != nil {
 				results <- Result{
 					URL: job.URL,

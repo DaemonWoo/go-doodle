@@ -7,7 +7,7 @@ Features:
 - Fan-in, Fan-out
 - Worker pool
 - Context cancellation (Ctrl+C)
-- Rate limiting
+- Rate limiting(golang.org/x/time/rate)
 - Burst support
 - Graceful shutdown
 

@@ -8,6 +8,8 @@ import (
 	"os/signal"
 	"sync"
 	"time"
+
+	"golang.org/x/time/rate"
 )
 
 var wg sync.WaitGroup
@@ -15,6 +17,8 @@ var wg sync.WaitGroup
 func main() {
 	urls := os.Args[1:]
 	workerCount := 5
+
+	limiter := rate.NewLimiter(2, 5)
 
 	ctx, stop := signal.NotifyContext(
 		context.Background(),
@@ -31,7 +35,7 @@ func main() {
 	// start workers
 	for i := range workerCount {
 		wg.Go(func() {
-			worker(i, ctx, jobs, results, client)
+			worker(i, ctx, jobs, results, client, limiter)
 		})
 	}
 

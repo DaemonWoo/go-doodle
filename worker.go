@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+
+	"golang.org/x/time/rate"
 )
 
 func worker(
@@ -12,6 +14,7 @@ func worker(
 	jobs <-chan Job,
 	results chan<- Result,
 	client *http.Client,
+	limiter *rate.Limiter,
 ) {
 	for {
 		select {
@@ -22,6 +25,18 @@ func worker(
 			if !ok {
 				return
 			}
+
+			// Uncomment for rate-limiting logs
+			//fmt.Printf("%s waiting token\n", job.URL)
+			
+			if err := limiter.Wait(ctx); err != nil {
+				return
+			}
+			
+			// Uncomment for rate-limiting logs
+			// fmt.Printf("%s got token %s\n",
+			// 	job.URL,
+			// 	time.Now().Format("15:04:05.000"))
 
 			fmt.Printf(
 				"[worker-%d] processing %s\n",
@@ -50,7 +65,7 @@ func worker(
 				id,
 				job.URL,
 			)
-			
+
 			if err != nil {
 				results <- Result{
 					URL: job.URL,

@@ -2,7 +2,7 @@ package main
 
 import "time"
 
-func Limiter() <-chan struct{} {
+func CustomLimiter() <-chan struct{} {
 	// amount of requests per second
 	const Rps = 2
 	// token bucket capacity.

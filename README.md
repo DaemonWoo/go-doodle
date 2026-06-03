@@ -11,18 +11,6 @@ Features:
 - Burst support
 - Graceful shutdown
 
-## Run
-
-Check several URLs:
-
-```bash
-go run . \
-https://google.com \
-https://github.com \
-https://golang.org \
-https://example.com
-```
-
 ## Example
 
 ```bash

@@ -28,11 +28,11 @@ func worker(
 
 			// Uncomment for rate-limiting logs
 			//fmt.Printf("%s waiting token\n", job.URL)
-			
+
 			if err := limiter.Wait(ctx); err != nil {
 				return
 			}
-			
+
 			// Uncomment for rate-limiting logs
 			// fmt.Printf("%s got token %s\n",
 			// 	job.URL,

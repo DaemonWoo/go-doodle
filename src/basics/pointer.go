@@ -1,4 +1,4 @@
-package basics 
+package basics
 
 func createPointer() *int64 {
 	a := int64(5)
@@ -8,4 +8,3 @@ func createPointer() *int64 {
 func printBoolPointer(b *bool) {
 	println(*b)
 }
-

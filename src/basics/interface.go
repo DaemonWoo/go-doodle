@@ -17,6 +17,7 @@ func makeSound(s Speaker) {
 }
 
 type CoffeePot string
+
 func (c CoffeePot) String() string {
 	return string(c) + " coffee pot"
 }
@@ -50,4 +51,3 @@ type Player interface {
 	Play(string)
 	Stop()
 }
-
